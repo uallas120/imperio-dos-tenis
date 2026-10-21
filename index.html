@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Império dos Tênis">
+<meta name="theme-color" content="#1b1740">
+<title>Império dos Tênis</title>
+<style>
+:root{--tinta:#1b1740;--ouro:#e8b923;--fundo:#f5f4f8;--card:#fff;--linha:#dedbe8;--mut:#6b6882;--ok:#1f7a4d;--ruim:#c0392b}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fundo);color:var(--tinta);padding-bottom:env(safe-area-inset-bottom,0)}
+.hidden{display:none!important}
+header{background:var(--tinta);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 12px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font:700 1.35rem Georgia,"Times New Roman",serif;letter-spacing:.2px}
+header h1 span{color:var(--ouro)}
+header button{background:none;border:1px solid #ffffff55;color:#fff;border-radius:8px;padding:6px 12px;font-size:.85rem}
+nav{display:flex;background:var(--tinta);padding:0 8px;position:sticky;top:0;z-index:5}
+nav button{flex:1;background:none;border:0;color:#cfcbe8;padding:12px 4px;font-size:.95rem;border-bottom:3px solid transparent}
+nav button.on{color:#fff;border-bottom-color:var(--ouro);font-weight:700}
+main{max-width:560px;margin:0 auto;padding:16px}
+section{display:none}
+section.on{display:block}
+.card{background:var(--card);border:1px solid var(--linha);border-radius:12px;padding:16px;margin-bottom:16px}
+h2{font-size:1.05rem;margin:0 0 12px}
+label{display:block;font-size:.85rem;color:var(--mut);margin:10px 0 4px}
+input,select{width:100%;padding:12px;font-size:1rem;border:1px solid var(--linha);border-radius:8px;background:#fff;color:var(--tinta)}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--ouro);outline-offset:1px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{width:100%;margin-top:16px;padding:14px;font-size:1rem;font-weight:700;border:0;border-radius:10px;background:var(--tinta);color:#fff}
+.btn.ouro{background:var(--ouro);color:var(--tinta)}
+.item{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--linha)}
+.item:last-child{border-bottom:0}
+.item b{font-size:1.1rem}.item b.baixo{color:var(--ruim)}
+.mut{color:var(--mut)}
+.total{font-size:.95rem;color:var(--mut);margin:0 0 8px}
+.valor{font:700 1.8rem Georgia,serif;margin:12px 0 0}
+#login{max-width:380px;margin:12vh auto;padding:0 16px}
+#toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ok);color:#fff;padding:12px 18px;border-radius:10px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
+#toast.show{opacity:1}#toast.err{background:var(--ruim)}
+</style>
+</head>
+<body>
+
+<div id="login" class="hidden">
+  <div class="card">
+    <h1 style="font:700 1.6rem Georgia,serif;margin:0 0 4px">Império <span style="color:var(--ouro)">dos Tênis</span></h1>
+    <p class="mut" style="margin:0 0 8px">Entre para ver o estoque e o caixa.</p>
+    <form onsubmit="entrar(event)">
+      <label for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
+
+<div id="app" class="hidden">
+  <header>
+    <h1>Império <span>dos Tênis</span></h1>
+    <button onclick="sair()">Sair</button>
+  </header>
+  <nav>
+    <button class="on" data-t="estoque">Estoque</button>
+    <button data-t="entrada">Entrada</button>
+    <button data-t="venda">Venda</button>
+    <button data-t="relatorio">Relatórios</button>
+  </nav>
+  <main>
+
+    <section id="estoque" class="on">
+      <div class="card">
+        <p class="total" id="total"></p>
+        <input id="busca" type="search" placeholder="Buscar modelo, marca, cor ou tamanho" oninput="listar()">
+        <div id="lista"></div>
+      </div>
+      <div class="card">
+        <h2>Cadastrar sapato novo</h2>
+        <form onsubmit="novo(event)">
+          <label for="n-modelo">Modelo</label>
+          <input id="n-modelo" required>
+          <div class="row">
+            <div><label for="n-marca">Marca</label><input id="n-marca"></div>
+            <div><label for="n-cor">Cor</label><input id="n-cor"></div>
+          </div>
+          <div class="row">
+            <div><label for="n-tam">Tamanho</label><input id="n-tam" inputmode="numeric"></div>
+            <div><label for="n-qtd">Quantidade que chegou</label><input id="n-qtd" type="number" min="0" value="1" inputmode="numeric"></div>
+          </div>
+          <button class="btn" type="submit">Cadastrar sapato</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="entrada">
+      <div class="card">
+        <h2>Chegou mais de um sapato já cadastrado</h2>
+        <form onsubmit="entrada(event)">
+          <label for="ent-prod">Sapato</label>
+          <select id="ent-prod"></select>
+          <label for="ent-qtd">Quantidade que chegou</label>
+          <input id="ent-qtd" type="number" min="1" value="1" inputmode="numeric" required>
+          <button class="btn" type="submit">Registrar entrada</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="venda">
+      <div class="card">
+        <h2>Registrar venda</h2>
+        <form onsubmit="vender(event)">
+          <label for="ven-prod">Sapato</label>
+          <select id="ven-prod"></select>
+          <div class="row">
+            <div><label for="ven-qtd">Quantidade</label><input id="ven-qtd" type="number" min="1" value="1" inputmode="numeric" oninput="calc()" required></div>
+            <div><label for="ven-pag">Pagamento</label>
+              <select id="ven-pag" onchange="calc()">
+                <option value="pix">Pix</option>
+                <option value="dinheiro">Dinheiro</option>
+                <option value="cartao">Cartão</option>
+              </select></div>
+          </div>
+          <p class="valor" id="ven-valor"></p>
+          <button class="btn ouro" type="submit">Registrar venda</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="relatorio">
+      <div class="card"><h2>Por semana</h2><div id="rel-sem"></div></div>
+      <div class="card"><h2>Por mês</h2><div id="rel-mes"></div></div>
+    </section>
+
+  </main>
+</div>
+<div id="toast" role="status"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://tqthagsrawqjnbbyeazc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Ie6TnUWSjGJ3gsPwyYTPtw_v1wNkiVa';
+// Preços por forma de pagamento (mude aqui se precisar)
+const PRECO = { pix: 80, dinheiro: 80, cartao: 85 };
+
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let produtos = [];
+
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const nome = p => [p.modelo, p.marca, p.cor, p.tamanho ? 'nº ' + p.tamanho : ''].filter(Boolean).join(' · ');
+
+function toast(msg, erro) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show' + (erro ? ' err' : '');
+  setTimeout(() => { t.className = ''; }, 3000);
+}
+
+async function mostrar() {
+  const { data } = await db.auth.getSession();
+  const logado = !!data.session;
+  $('login').classList.toggle('hidden', logado);
+  $('app').classList.toggle('hidden', !logado);
+  if (logado) carregar();
+}
+
+async function entrar(e) {
+  e.preventDefault();
+  const { error } = await db.auth.signInWithPassword({ email: $('email').value.trim(), password: $('senha').value });
+  if (error) return toast('E-mail ou senha incorretos', true);
+  mostrar();
+}
+
+async function sair() { await db.auth.signOut(); mostrar(); }
+
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+  if (b.dataset.t === 'relatorio') relatorios();
+}));
+
+async function carregar() {
+  const { data, error } = await db.from('produtos').select('*').order('modelo');
+  if (error) return toast('Erro ao carregar: ' + error.message, true);
+  produtos = data;
+  listar(); opcoes(); calc();
+}
+
+function listar() {
+  const q = $('busca').value.toLowerCase();
+  const l = produtos.filter(p => nome(p).toLowerCase().includes(q));
+  $('lista').innerHTML = l.map(p => `<div class="item"><span>${esc(nome(p))}</span><b class="${p.estoque <= 2 ? 'baixo' : ''}">${p.estoque}</b></div>`).join('')
+    || '<p class="mut">Nenhum sapato encontrado. Cadastre o primeiro abaixo.</p>';
+  $('total').textContent = produtos.reduce((s, p) => s + p.estoque, 0) + ' pares em estoque (vermelho: 2 ou menos)';
+}
+
+function opcoes() {
+  const o = produtos.map(p => `<option value="${p.id}">${esc(nome(p))} (${p.estoque})</option>`).join('');
+  $('ent-prod').innerHTML = o;
+  $('ven-prod').innerHTML = o;
+}
+
+async function novo(e) {
+  e.preventDefault();
+  const qtd = parseInt($('n-qtd').value) || 0;
+  const { data, error } = await db.from('produtos').insert({
+    modelo: $('n-modelo').value.trim(),
+    marca: $('n-marca').value.trim() || null,
+    cor: $('n-cor').value.trim() || null,
+    tamanho: $('n-tam').value.trim() || null
+  }).select().single();
+  if (error) return toast(error.message, true);
+  if (qtd > 0) {
+    const r = await db.from('movimentos').insert({ produto_id: data.id, tipo: 'entrada', quantidade: qtd });
+    if (r.error) return toast(r.error.message, true);
+  }
+  e.target.reset(); $('n-qtd').value = 1;
+  toast('Sapato cadastrado'); carregar();
+}
+
+async function entrada(e) {
+  e.preventDefault();
+  const q = parseInt($('ent-qtd').value) || 0;
+  if (!$('ent-prod').value || q < 1) return toast('Escolha o sapato e a quantidade', true);
+  const { error } = await db.from('movimentos').insert({ produto_id: $('ent-prod').value, tipo: 'entrada', quantidade: q });
+  if (error) return toast(error.message, true);
+  $('ent-qtd').value = 1;
+  toast('Entrada registrada'); carregar();
+}
+
+function calc() {
+  const q = parseInt($('ven-qtd').value) || 0;
+  $('ven-valor').textContent = 'Total: ' + brl(q * PRECO[$('ven-pag').value]);
+}
+
+async function vender(e) {
+  e.preventDefault();
+  const p = produtos.find(x => String(x.id) === $('ven-prod').value);
+  const q = parseInt($('ven-qtd').value) || 0;
+  const f = $('ven-pag').value;
+  if (!p || q < 1) return toast('Escolha o sapato e a quantidade', true);
+  if (q > p.estoque) return toast('Só há ' + p.estoque + ' em estoque', true);
+  const { error } = await db.from('movimentos').insert({ produto_id: p.id, tipo: 'venda', quantidade: q, forma_pagamento: f, valor: q * PRECO[f] });
+  if (error) return toast(error.message, true);
+  $('ven-qtd').value = 1; calc();
+  toast('Venda registrada'); carregar();
+}
+
+async function relatorios() {
+  const [s, m] = await Promise.all([
+    db.from('relatorio_semanal').select('*').limit(12),
+    db.from('relatorio_mensal').select('*').limit(12)
+  ]);
+  const vazio = '<p class="mut">Ainda não há vendas.</p>';
+  const linha = (t, r) => `<div class="item"><span>${esc(t)}</span><span>${r.pares_vendidos || 0} pares · <b>${brl(r.total_caixa)}</b></span></div>`;
+  const dia = x => new Date(x).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+  const mes = x => new Date(x).toLocaleDateString('pt-BR', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+  $('rel-sem').innerHTML = (s.data || []).map(r => linha('Semana de ' + dia(r.semana), r)).join('') || vazio;
+  $('rel-mes').innerHTML = (m.data || []).map(r => linha(mes(r.mes), r)).join('') || vazio;
+}
+
+mostrar();
+</script>
+</body>
+</html>
