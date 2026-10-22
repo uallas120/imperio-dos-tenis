@@ -1,605 +1,365 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Empório dos Tênis</title>
-    <link rel="manifest" href="./manifest.json">
-    <meta name="theme-color" content="#1e293b">
-    <link rel="apple-touch-icon" href="./icon-192.png">
-    <style>
-        :root {
-            --primary: #1e293b;
-            --accent: #d97706;
-            --accent-hover: #b45309;
-            --bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text: #0f172a;
-            --text-light: #64748b;
-            --border: #e2e8f0;
-            --success: #16a34a;
-        }
-
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-        }
-
-        body {
-            background-color: var(--bg);
-            color: var(--text);
-            padding-bottom: 80px;
-        }
-
-        header {
-            background-color: var(--primary);
-            color: white;
-            padding: 16px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-
-        header h1 {
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        header span.crown {
-            color: var(--accent);
-        }
-
-        .container {
-            max-width: 600px;
-            margin: 0 auto;
-            padding: 16px;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            padding: 16px;
-            margin-bottom: 16px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.05);
-            border: 1px solid var(--border);
-        }
-
-        h2 {
-            font-size: 1.1rem;
-            margin-bottom: 12px;
-            color: var(--primary);
-            border-bottom: 2px solid var(--border);
-            padding-bottom: 6px;
-        }
-
-        .form-group {
-            margin-bottom: 12px;
-        }
-
-        label {
-            display: block;
-            font-size: 0.85rem;
-            color: var(--text-light);
-            margin-bottom: 4px;
-            font-weight: 500;
-        }
-
-        input, select, textarea {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-            outline: none;
-            background: #fff;
-        }
-
-        input:focus, select:focus {
-            border-color: var(--accent);
-        }
-
-        .btn {
-            width: 100%;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 1rem;
-            font-weight: bold;
-            cursor: pointer;
-            background-color: var(--accent);
-            color: white;
-            transition: background 0.2s;
-            text-align: center;
-            display: inline-block;
-            text-decoration: none;
-        }
-
-        .btn:hover {
-            background-color: var(--accent-hover);
-        }
-
-        .btn-success {
-            background-color: var(--success);
-        }
-        .btn-success:hover {
-            background-color: #15803d;
-        }
-
-        .payment-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 10px;
-            margin-top: 8px;
-        }
-
-        .pay-btn {
-            padding: 16px;
-            border: 2px solid var(--border);
-            border-radius: 10px;
-            background: #fff;
-            cursor: pointer;
-            text-align: left;
-            transition: all 0.2s;
-        }
-
-        .pay-btn.selected {
-            border-color: var(--accent);
-            background-color: #fef3c7;
-        }
-
-        .pay-title {
-            font-weight: bold;
-            font-size: 1.05rem;
-            color: var(--primary);
-        }
-
-        .pay-price {
-            font-size: 0.9rem;
-            color: var(--accent);
-            font-weight: 600;
-            margin-top: 2px;
-        }
-
-        /* Bottom Nav */
-        nav.bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: white;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 0;
-            z-index: 1000;
-            box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
-        }
-
-        .nav-item {
-            background: none;
-            border: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: var(--text-light);
-            font-size: 0.75rem;
-            cursor: pointer;
-            flex: 1;
-            padding: 4px;
-        }
-
-        .nav-item svg {
-            width: 24px;
-            height: 24px;
-            margin-bottom: 2px;
-            fill: currentColor;
-        }
-
-        .nav-item.active {
-            color: var(--accent);
-            font-weight: bold;
-        }
-
-        .stock-item, .sale-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid var(--border);
-            font-size: 0.9rem;
-        }
-
-        .stock-item:last-child, .sale-item:last-child {
-            border-bottom: none;
-        }
-
-        .summary-box {
-            background: #f1f5f9;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.95rem;
-        }
-        .summary-box p {
-            margin-bottom: 6px;
-        }
-        .summary-box p:last-child {
-            margin-bottom: 0;
-        }
-    </style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Império dos Tênis">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1b1740">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="icon-512.png">
+<link rel="icon" href="icon-192.png">
+<title>Império dos Tênis</title>
+<style>
+:root{--tinta:#1b1740;--ouro:#e8b923;--fundo:#f5f4f8;--card:#fff;--linha:#dedbe8;--mut:#6b6882;--ok:#1f7a4d;--ruim:#c0392b}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--fundo);color:var(--tinta);padding-bottom:calc(76px + env(safe-area-inset-bottom,0))}
+.hidden{display:none!important}
+header{background:var(--tinta);color:#fff;padding:calc(14px + env(safe-area-inset-top,0)) 16px 14px;display:flex;justify-content:space-between;align-items:center}
+header h1{margin:0;font:700 1.35rem Georgia,"Times New Roman",serif}
+header h1 span{color:var(--ouro)}
+header button{background:none;border:1px solid #ffffff55;color:#fff;border-radius:10px;padding:8px 14px;font-size:.9rem;min-height:40px}
+main{max-width:560px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+.card{background:var(--card);border:1px solid var(--linha);border-radius:14px;padding:16px;margin-bottom:16px}
+h2{font-size:1.05rem;margin:0 0 12px}
+label.f{display:block;font-size:.85rem;color:var(--mut);margin:12px 0 4px}
+input,select{width:100%;padding:13px;font-size:1rem;border:1px solid var(--linha);border-radius:10px;background:#fff;color:var(--tinta)}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--ouro);outline-offset:1px}
+.row{display:flex;gap:10px}.row>*{flex:1}
+.btn{width:100%;min-height:54px;margin-top:16px;font-size:1.05rem;font-weight:700;border:0;border-radius:12px;background:var(--tinta);color:#fff}
+.btn.ouro{background:var(--ouro);color:var(--tinta)}
+.btn:active{transform:scale(.98)}
+.item{display:flex;justify-content:space-between;gap:12px;align-items:center;min-height:52px;padding:10px 0;border-bottom:1px solid var(--linha)}
+.item:last-child{border-bottom:0}
+.item b{font-size:1.15rem}.item b.baixo{color:var(--ruim)}
+.dir{display:flex;align-items:center;gap:10px}
+.del{min-height:44px;padding:0 12px;border:1px solid var(--ruim);background:#fff;color:var(--ruim);border-radius:10px;font-size:.85rem}
+.mut{color:var(--mut);font-size:.9rem}
+.total{margin:0 0 10px}
+.chips{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:4px}
+.chip{min-height:64px;border:2px solid var(--linha);border-radius:12px;background:#fff;color:var(--tinta);font-size:.95rem;font-weight:600;padding:6px}
+.chip small{display:block;font-weight:400;color:var(--mut)}
+.chip.on{border-color:var(--ouro);background:#fff8de}
+.valor{font:700 2rem Georgia,serif;margin:14px 0 0}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin-top:12px}
+.seg button{min-height:48px;border:1px solid var(--linha);background:#fff;border-radius:10px;font-size:1rem;color:var(--tinta);font-weight:600}
+.seg button.on{background:var(--tinta);color:#fff;border-color:var(--tinta)}
+.fc{background:var(--tinta);color:#fff;border-radius:16px;padding:18px;margin-bottom:16px}
+.fc small{color:#bdb8dc;display:block}
+.fc .big{font:700 2.2rem Georgia,serif;color:var(--ouro);margin:4px 0}
+.linha{display:flex;justify-content:space-between;align-items:center;padding:12px 0;border-bottom:1px solid var(--linha)}
+.linha:last-child{border-bottom:0}
+.linha small{display:block;color:var(--mut)}
+.linha b{font-size:1.1rem}
+.tot{font-weight:800}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:#fff;border-top:1px solid var(--linha);padding-bottom:env(safe-area-inset-bottom,0);z-index:5}
+nav button{flex:1;min-height:60px;background:none;border:0;color:var(--mut);font-size:.9rem;font-weight:600;border-top:3px solid transparent}
+nav button.on{color:var(--tinta);border-top-color:var(--ouro)}
+#login{max-width:380px;margin:10vh auto;padding:0 16px}
+#toast{position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom,0));transform:translateX(-50%);background:var(--ok);color:#fff;padding:12px 18px;border-radius:12px;opacity:0;pointer-events:none;transition:opacity .2s;max-width:90%;text-align:center;z-index:9}
+#toast.show{opacity:1}#toast.err{background:var(--ruim)}
+</style>
 </head>
 <body>
 
-    <header>
-        <h1><span class="crown">👑</span> Empório dos Tênis</h1>
-    </header>
+<div id="login" class="hidden">
+  <div class="card">
+    <h1 style="font:700 1.6rem Georgia,serif;margin:0 0 4px">Império <span style="color:var(--ouro)">dos Tênis</span></h1>
+    <p class="mut" style="margin:0 0 8px">Entre para ver o estoque e o caixa.</p>
+    <form onsubmit="entrar(event)">
+      <label class="f" for="email">E-mail</label>
+      <input id="email" type="email" autocomplete="username" required>
+      <label class="f" for="senha">Senha</label>
+      <input id="senha" type="password" autocomplete="current-password" required>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+  </div>
+</div>
 
-    <div class="container">
-        
-        <!-- ABA VENDAS -->
-        <div id="tab-vendas" class="tab-content active">
-            <div class="card">
-                <h2>Registrar Venda</h2>
-                <form id="saleForm">
-                    <div class="form-group">
-                        <label for="saleModel">Selecionar Tênis</label>
-                        <select id="saleModel" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="saleSize">Tamanho</label>
-                        <select id="saleSize" required>
-                            <option value="">Selecione o modelo primeiro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label>Forma de Pagamento</label>
-                        <div class="payment-grid">
-                            <button type="button" class="pay-btn" onclick="selectPayment('Dinheiro', 85, this)">
-                                <div class="pay-title">💵 Dinheiro</div>
-                                <div class="pay-price">R$ 85,00</div>
-                            </button>
-                            <button type="button" class="pay-btn" onclick="selectPayment('Pix', 85, this)">
-                                <div class="pay-title">💠 Pix</div>
-                                <div class="pay-price">R$ 85,00</div>
-                            </button>
-                            <button type="button" class="pay-btn" onclick="selectPayment('Cartão', 90, this)">
-                                <div class="pay-title">💳 Cartão</div>
-                                <div class="pay-price">R$ 90,00</div>
-                            </button>
-                        </div>
-                        <input type="hidden" id="selectedPayment" required>
-                        <input type="hidden" id="selectedPrice" required>
-                    </div>
-                    <button type="submit" class="btn btn-success">Confirmar Venda</button>
-                </form>
-            </div>
+<div id="app" class="hidden">
+  <header>
+    <h1>Império <span>dos Tênis</span></h1>
+    <button onclick="sair()">Sair</button>
+  </header>
+  <main>
 
-            <div class="card">
-                <h2>Vendas Recentes</h2>
-                <div id="recentSalesList"></div>
-            </div>
+    <section id="estoque" class="on">
+      <div class="card">
+        <p class="total mut" id="total"></p>
+        <input id="busca" type="search" placeholder="Buscar modelo, marca, cor ou tamanho" oninput="listar()">
+        <div id="lista"></div>
+      </div>
+    </section>
+
+    <section id="entrada">
+      <div class="card">
+        <h2>Chegou mais de um sapato já cadastrado</h2>
+        <form onsubmit="entrada(event)">
+          <label class="f" for="ent-prod">Sapato</label>
+          <select id="ent-prod"></select>
+          <label class="f" for="ent-qtd">Quantidade que chegou</label>
+          <input id="ent-qtd" type="number" min="1" value="1" inputmode="numeric" required>
+          <button class="btn" type="submit">Registrar entrada</button>
+        </form>
+      </div>
+      <div class="card">
+        <h2>Cadastrar sapato novo</h2>
+        <form onsubmit="novo(event)">
+          <label class="f" for="n-modelo">Modelo</label>
+          <input id="n-modelo" required>
+          <div class="row">
+            <div><label class="f" for="n-marca">Marca</label><input id="n-marca"></div>
+            <div><label class="f" for="n-cor">Cor</label><input id="n-cor"></div>
+          </div>
+          <div class="row">
+            <div><label class="f" for="n-tam">Tamanho</label><input id="n-tam" inputmode="numeric"></div>
+            <div><label class="f" for="n-qtd">Quantidade</label><input id="n-qtd" type="number" min="0" value="1" inputmode="numeric"></div>
+          </div>
+          <button class="btn" type="submit">Cadastrar sapato</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="venda">
+      <div class="card">
+        <h2>Registrar venda</h2>
+        <form onsubmit="vender(event)">
+          <label class="f" for="ven-prod">Sapato</label>
+          <select id="ven-prod"></select>
+          <label class="f" for="ven-qtd">Quantidade</label>
+          <input id="ven-qtd" type="number" min="1" value="1" inputmode="numeric" oninput="calc()" required>
+          <label class="f">Forma de pagamento</label>
+          <div class="chips" id="chips"></div>
+          <p class="valor" id="ven-valor"></p>
+          <button class="btn ouro" type="submit">Registrar venda</button>
+        </form>
+      </div>
+    </section>
+
+    <section id="fechamento">
+      <div class="card">
+        <label class="f" for="f-data" style="margin-top:0">Data de referência</label>
+        <input id="f-data" type="date" onchange="fechar()">
+        <div class="seg" id="seg">
+          <button data-p="dia" class="on">Dia</button>
+          <button data-p="semana">Semana</button>
+          <button data-p="mes">Mês</button>
         </div>
+      </div>
+      <div class="fc">
+        <small id="f-rot"></small>
+        <div class="big" id="f-total"></div>
+        <small id="f-resumo"></small>
+      </div>
+      <div class="card">
+        <h2>Por forma de pagamento</h2>
+        <div id="f-formas"></div>
+        <div class="linha tot"><span>Soma total</span><b id="f-soma"></b></div>
+      </div>
+      <button class="btn" onclick="compartilhar()">Compartilhar fechamento</button>
+    </section>
 
-        <!-- ABA ENTRADA (Cadastro de Modelo + Entrada de Mercadoria) -->
-        <div id="tab-entrada" class="tab-content">
-            <div class="card">
-                <h2>Cadastrar Novo Modelo</h2>
-                <form id="modelForm">
-                    <div class="form-group">
-                        <label for="modelName">Nome / Descrição do Tênis</label>
-                        <input type="text" id="modelName" placeholder="Ex: Nike Air Force" required>
-                    </div>
-                    <button type="submit" class="btn">Salvar Modelo</button>
-                </form>
-            </div>
+  </main>
+  <nav>
+    <button class="on" data-t="estoque">Estoque</button>
+    <button data-t="entrada">Entrada</button>
+    <button data-t="venda">Venda</button>
+    <button data-t="fechamento">Fechamento</button>
+  </nav>
+</div>
+<div id="toast" role="status"></div>
 
-            <div class="card">
-                <h2>Entrada de Mercadoria (Estoque)</h2>
-                <form id="stockForm">
-                    <div class="form-group">
-                        <label for="stockModel">Modelo</label>
-                        <select id="stockModel" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="stockSize">Tamanho</label>
-                        <input type="text" id="stockSize" placeholder="Ex: 38" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="stockQty">Quantidade</label>
-                        <input type="number" id="stockQty" min="1" value="1" required>
-                    </div>
-                    <button type="submit" class="btn">Adicionar ao Estoque</button>
-                </form>
-            </div>
-        </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const SUPABASE_URL = 'https://tqthagsrawqjnbbyeazc.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_Ie6TnUWSjGJ3gsPwyYTPtw_v1wNkiVa';
+// Preços por forma de pagamento (mude aqui se precisar)
+const PRECO = { pix: 85, dinheiro: 85, cartao: 90 };
+const FORMAS = [['pix', 'Pix'], ['dinheiro', 'Dinheiro'], ['cartao', 'Cartão']];
 
-        <!-- ABA ESTOQUE -->
-        <div id="tab-estoque" class="tab-content">
-            <div class="card">
-                <h2>Estoque Atual</h2>
-                <div id="stockList"></div>
-            </div>
-        </div>
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+const $ = id => document.getElementById(id);
+let produtos = [], forma = 'pix', periodo = 'dia', ultimoTexto = '';
 
-        <!-- ABA FECHAMENTO -->
-        <div id="tab-fechamento" class="tab-content">
-            <div class="card">
-                <h2>Fechamento de Caixa</h2>
-                <div class="form-group">
-                    <label for="closingType">Período</label>
-                    <select id="closingType" onchange="calcularFechamento()">
-                        <option value="dia">Dia</option>
-                        <option value="semana">Semana</option>
-                        <option value="mes">Mês</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="closingDate">Data de Referência</label>
-                    <input type="date" id="closingDate" onchange="calcularFechamento()">
-                </div>
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = n => Number(n || 0).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+const nome = p => [p.modelo, p.marca, p.cor, p.tamanho ? 'nº ' + p.tamanho : ''].filter(Boolean).join(' · ');
+const pad = n => String(n).padStart(2, '0');
+const iso = d => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const pares = n => n + (n === 1 ? ' par' : ' pares');
 
-                <div class="summary-box" id="closingResult">
-                    <!-- Preenchido via JS -->
-                </div>
+function toast(msg, erro) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'show' + (erro ? ' err' : '');
+  setTimeout(() => { t.className = ''; }, 3000);
+}
 
-                <div style="margin-top: 15px;">
-                    <button type="button" class="btn btn-success" onclick="compartilharWhatsApp()">📲 Compartilhar Fechamento</button>
-                </div>
-            </div>
-        </div>
+async function mostrar() {
+  const { data } = await db.auth.getSession();
+  const logado = !!data.session;
+  $('login').classList.toggle('hidden', logado);
+  $('app').classList.toggle('hidden', !logado);
+  if (logado) carregar();
+}
+async function entrar(e) {
+  e.preventDefault();
+  const { error } = await db.auth.signInWithPassword({ email: $('email').value.trim(), password: $('senha').value });
+  if (error) return toast('E-mail ou senha incorretos', true);
+  mostrar();
+}
+async function sair() { await db.auth.signOut(); mostrar(); }
 
-    </div>
+document.querySelectorAll('nav button').forEach(b => b.addEventListener('click', () => {
+  document.querySelectorAll('nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.t));
+  window.scrollTo(0, 0);
+  if (b.dataset.t === 'fechamento') fechar();
+}));
 
-    <!-- MENU INFERIOR -->
-    <nav class="bottom-nav">
-        <button class="nav-item active" onclick="switchTab('vendas', this)">
-            <svg viewBox="0 0 24 24"><path d="M7 18c-1.1 0-1.99.9-1.99 2S5.9 22 7 22s2-.9 2-2-.9-2-2-2zM1 2v2h2l3.6 7.59-1.35 2.45c-.16.28-.25.61-.25.96 0 1.1.9 2 2 2h12v-2H7.42c-.14 0-.25-.11-.25-.25l.03-.12.9-1.63h7.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49c.08-.14.12-.31.12-.48 0-.55-.45-1-1-1H5.21l-.94-2H1zm16 16c-1.1 0-1.99.9-1.99 2s.89 2 1.99 2 2-.9 2-2-.9-2-2-2z"/></svg>
-            Vendas
-        </button>
-        <button class="nav-item" onclick="switchTab('entrada', this)">
-            <svg viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
-            Entrada
-        </button>
-        <button class="nav-item" onclick="switchTab('estoque', this)">
-            <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 15H4V8h16v11z"/></svg>
-            Estoque
-        </button>
-        <button class="nav-item" onclick="switchTab('fechamento', this)">
-            <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-            Fechamento
-        </button>
-    </nav>
+async function carregar() {
+  const { data, error } = await db.from('produtos').select('*').eq('ativo', true).order('modelo');
+  if (error) return toast('Erro ao carregar: ' + error.message, true);
+  produtos = data;
+  listar(); opcoes(); desenharChips(); calc();
+  if (!$('f-data').value) $('f-data').value = iso(new Date());
+}
 
-    <script>
-        // Inicializar Banco Local
-        let db = JSON.parse(localStorage.getItem('emporio_db')) || { models: [], stock: {}, sales: [] };
+function listar() {
+  const q = $('busca').value.toLowerCase();
+  const l = produtos.filter(p => nome(p).toLowerCase().includes(q));
+  $('lista').innerHTML = l.map(p => `<div class="item"><span>${esc(nome(p))}</span><span class="dir"><b class="${p.estoque <= 2 ? 'baixo' : ''}">${p.estoque}</b><button class="del" onclick="apagar(${p.id})">Apagar</button></span></div>`).join('')
+    || '<p class="mut">Nenhum sapato encontrado. Cadastre o primeiro na aba Entrada.</p>';
+  $('total').textContent = produtos.reduce((s, p) => s + p.estoque, 0) + ' pares em estoque (vermelho: 2 ou menos)';
+}
+function opcoes() {
+  const o = produtos.map(p => `<option value="${p.id}">${esc(nome(p))} (${p.estoque})</option>`).join('');
+  $('ent-prod').innerHTML = o;
+  $('ven-prod').innerHTML = o;
+}
 
-        function saveDb() {
-            localStorage.setItem('emporio_db', JSON.stringify(db));
-        }
+async function novo(e) {
+  e.preventDefault();
+  const qtd = parseInt($('n-qtd').value) || 0;
+  const { data, error } = await db.from('produtos').insert({
+    modelo: $('n-modelo').value.trim(),
+    marca: $('n-marca').value.trim() || null,
+    cor: $('n-cor').value.trim() || null,
+    tamanho: $('n-tam').value.trim() || null
+  }).select().single();
+  if (error) return toast(error.message, true);
+  if (qtd > 0) {
+    const r = await db.from('movimentos').insert({ produto_id: data.id, tipo: 'entrada', quantidade: qtd });
+    if (r.error) return toast(r.error.message, true);
+  }
+  e.target.reset(); $('n-qtd').value = 1;
+  toast('Sapato cadastrado'); carregar();
+}
 
-        function switchTab(tabName, el) {
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            document.getElementById('tab-' + tabName).classList.add('active');
-            el.classList.add('active');
-            if(tabName === 'fechamento') {
-                document.getElementById('closingDate').valueAsDate = new Date();
-                calcularFechamento();
-            }
-        }
+async function entrada(e) {
+  e.preventDefault();
+  const q = parseInt($('ent-qtd').value) || 0;
+  if (!$('ent-prod').value || q < 1) return toast('Escolha o sapato e a quantidade', true);
+  const { error } = await db.from('movimentos').insert({ produto_id: $('ent-prod').value, tipo: 'entrada', quantidade: q });
+  if (error) return toast(error.message, true);
+  $('ent-qtd').value = 1;
+  toast('Entrada registrada'); carregar();
+}
 
-        // Cadastrar Modelo
-        document.getElementById('modelForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const name = document.getElementById('modelName').value.trim();
-            if(name && !db.models.includes(name)) {
-                db.models.push(name);
-                saveDb();
-                alert('Modelo cadastrado com sucesso!');
-                document.getElementById('modelName').value = '';
-                atualizarSelects();
-            } else {
-                alert('Modelo já existe ou inválido.');
-            }
-        });
+async function apagar(id) {
+  const p = produtos.find(x => x.id === id);
+  if (!p) return;
+  if (!confirm('Apagar do estoque: ' + nome(p) + '?\nO histórico de vendas e o fechamento são mantidos.')) return;
+  const { error } = await db.from('produtos').update({ ativo: false }).eq('id', id);
+  if (error) return toast(error.message, true);
+  toast('Item apagado'); carregar();
+}
 
-        // Adicionar Estoque
-        document.getElementById('stockForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const model = document.getElementById('stockModel').value;
-            const size = document.getElementById('stockSize').value.trim();
-            const qty = parseInt(document.getElementById('stockQty').value);
+function desenharChips() {
+  $('chips').innerHTML = FORMAS.map(f => `<button type="button" class="chip ${f[0] === forma ? 'on' : ''}" onclick="escolher('${f[0]}')">${f[1]}<small>${brl(PRECO[f[0]])}</small></button>`).join('');
+}
+function escolher(f) { forma = f; desenharChips(); calc(); }
+function calc() {
+  const q = parseInt($('ven-qtd').value) || 0;
+  $('ven-valor').textContent = 'Total: ' + brl(q * PRECO[forma]);
+}
 
-            if(!db.stock[model]) db.stock[model] = {};
-            db.stock[model][size] = (db.stock[model][size] || 0) + qty;
-            
-            saveDb();
-            alert('Estoque atualizado!');
-            document.getElementById('stockSize').value = '';
-            document.getElementById('stockQty').value = '1';
-            atualizarEstoqueView();
-            atualizarSelects();
-        });
+async function vender(e) {
+  e.preventDefault();
+  const p = produtos.find(x => String(x.id) === $('ven-prod').value);
+  const q = parseInt($('ven-qtd').value) || 0;
+  if (!p || q < 1) return toast('Escolha o sapato e a quantidade', true);
+  if (q > p.estoque) return toast('Só há ' + p.estoque + ' em estoque', true);
+  const { error } = await db.from('movimentos').insert({ produto_id: p.id, tipo: 'venda', quantidade: q, forma_pagamento: forma, valor: q * PRECO[forma] });
+  if (error) return toast(error.message, true);
+  $('ven-qtd').value = 1; calc();
+  if (navigator.vibrate) navigator.vibrate(40);
+  toast('Venda registrada: ' + brl(q * PRECO[forma])); carregar();
+}
 
-        function atualizarSelects() {
-            const saleModelSelect = document.getElementById('saleModel');
-            const stockModelSelect = document.getElementById('stockModel');
-            
-            saleModelSelect.innerHTML = '<option value="">Selecione...</option>';
-            stockModelSelect.innerHTML = '<option value="">Selecione...</option>';
+document.querySelectorAll('#seg button').forEach(b => b.addEventListener('click', () => {
+  periodo = b.dataset.p;
+  document.querySelectorAll('#seg button').forEach(x => x.classList.toggle('on', x === b));
+  fechar();
+}));
 
-            db.models.forEach(m => {
-                saleModelSelect.innerHTML += `<option value="${m}">${m}</option>`;
-                stockModelSelect.innerHTML += `<option value="${m}">${m}</option>`;
-            });
-            atualizarTamanhosVenda();
-        }
+function intervalo() {
+  const ref = new Date(($('f-data').value || iso(new Date())) + 'T00:00:00');
+  let ini, fim, rot;
+  if (periodo === 'dia') {
+    ini = new Date(ref); fim = new Date(ref); fim.setDate(fim.getDate() + 1);
+    rot = ref.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  } else if (periodo === 'semana') {
+    ini = new Date(ref); ini.setDate(ini.getDate() - ((ini.getDay() + 6) % 7));
+    fim = new Date(ini); fim.setDate(fim.getDate() + 7);
+    const ultimo = new Date(fim); ultimo.setDate(ultimo.getDate() - 1);
+    const f = d => d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+    rot = 'Semana de ' + f(ini) + ' a ' + f(ultimo);
+  } else {
+    ini = new Date(ref.getFullYear(), ref.getMonth(), 1);
+    fim = new Date(ref.getFullYear(), ref.getMonth() + 1, 1);
+    rot = ref.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' });
+  }
+  return [ini, fim, rot];
+}
 
-        document.getElementById('saleModel').addEventListener('change', atualizarTamanhosVenda);
+async function fechar() {
+  const [ini, fim, rot] = intervalo();
+  let linhas = [], de = 0;
+  while (true) {
+    const { data, error } = await db.from('movimentos').select('quantidade,forma_pagamento,valor')
+      .eq('tipo', 'venda').gte('criado_em', ini.toISOString()).lt('criado_em', fim.toISOString()).range(de, de + 999);
+    if (error) return toast('Erro no fechamento: ' + error.message, true);
+    linhas = linhas.concat(data);
+    if (data.length < 1000) break;
+    de += 1000;
+  }
+  const t = {}; FORMAS.forEach(f => { t[f[0]] = { p: 0, v: 0, n: 0 }; });
+  linhas.forEach(m => { const x = t[m.forma_pagamento]; if (!x) return; x.p += m.quantidade; x.v += Number(m.valor); x.n++; });
+  const P = FORMAS.reduce((s, f) => s + t[f[0]].p, 0), V = FORMAS.reduce((s, f) => s + t[f[0]].v, 0), N = FORMAS.reduce((s, f) => s + t[f[0]].n, 0);
+  $('f-rot').textContent = rot;
+  $('f-total').textContent = brl(V);
+  $('f-resumo').textContent = pares(P) + ' vendidos em ' + N + (N === 1 ? ' venda' : ' vendas');
+  $('f-formas').innerHTML = FORMAS.map(f => `<div class="linha"><span>${f[1]}<small>${pares(t[f[0]].p)} · ${t[f[0]].n} ${t[f[0]].n === 1 ? 'venda' : 'vendas'}</small></span><b>${brl(t[f[0]].v)}</b></div>`).join('');
+  $('f-soma').textContent = brl(V);
+  ultimoTexto = 'Império dos Tênis - ' + rot + '\n' + pares(P) + ' vendidos\n' +
+    FORMAS.map(f => f[1] + ': ' + pares(t[f[0]].p) + ' - ' + brl(t[f[0]].v)).join('\n') + '\nTotal: ' + brl(V);
+}
 
-        function atualizarTamanhosVenda() {
-            const model = document.getElementById('saleModel').value;
-            const sizeSelect = document.getElementById('saleSize');
-            sizeSelect.innerHTML = '<option value="">Selecione o tamanho</option>';
+async function compartilhar() {
+  if (!ultimoTexto) await fechar();
+  try {
+    if (navigator.share) await navigator.share({ text: ultimoTexto });
+    else { await navigator.clipboard.writeText(ultimoTexto); toast('Fechamento copiado'); }
+  } catch (e) { /* cancelado */ }
+}
 
-            if(model && db.stock[model]) {
-                for(let size in db.stock[model]) {
-                    if(db.stock[model][size] > 0) {
-                        sizeSelect.innerHTML += `<option value="${size}">${size} (Disp: ${db.stock[model][size]})</option>`;
-                    }
-                }
-            }
-        }
-
-        function selectPayment(method, price, btn) {
-            document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
-            btn.classList.add('selected');
-            document.getElementById('selectedPayment').value = method;
-            document.getElementById('selectedPrice').value = price;
-        }
-
-        // Registrar Venda
-        document.getElementById('saleForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const model = document.getElementById('saleModel').value;
-            const size = document.getElementById('saleSize').value;
-            const payment = document.getElementById('selectedPayment').value;
-            const price = parseFloat(document.getElementById('selectedPrice').value);
-
-            if(!payment) {
-                alert('Selecione a forma de pagamento.');
-                return;
-            }
-
-            if(db.stock[model] && db.stock[model][size] > 0) {
-                db.stock[model][size]--;
-                db.sales.push({
-                    date: new Date().toISOString(),
-                    model: model,
-                    size: size,
-                    payment: payment,
-                    price: price
-                });
-                saveDb();
-                alert('Venda registrada com sucesso!');
-                document.getElementById('saleForm').reset();
-                document.querySelectorAll('.pay-btn').forEach(b => b.classList.remove('selected'));
-                atualizarSelects();
-                atualizarEstoqueView();
-                atualizarVendasRecentes();
-            } else {
-                alert('Produto sem estoque neste tamanho!');
-            }
-        });
-
-        function atualizarEstoqueView() {
-            const list = document.getElementById('stockList');
-            list.innerHTML = '';
-            let vazio = true;
-            for(let m in db.stock) {
-                for(let s in db.stock[m]) {
-                    if(db.stock[m][s] > 0) {
-                        vazio = false;
-                        list.innerHTML += `<div class="stock-item"><span><b>${m}</b> - Tam: ${s}</span><span><b>${db.stock[m][s]}</b> un</span></div>`;
-                    }
-                }
-            }
-            if(vazio) list.innerHTML = '<p style="color:var(--text-light); text-align:center;">Estoque vazio.</p>';
-        }
-
-        function atualizarVendasRecentes() {
-            const list = document.getElementById('recentSalesList');
-            list.innerHTML = '';
-            const ultimas = [...db.sales].reverse().slice(0, 5);
-            if(ultimas.length === 0) {
-                list.innerHTML = '<p style="color:var(--text-light); text-align:center;">Nenhuma venda recente.</p>';
-                return;
-            }
-            ultimas.forEach(v => {
-                const dataStr = new Date(v.date).toLocaleDateString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-                list.innerHTML += `<div class="sale-item"><div><b>${v.model}</b> (Tam ${v.size})<br><small style="color:var(--text-light)">${dataStr} - ${v.payment}</small></div><b style="color:var(--success)">R$ ${v.price.toFixed(2)}</b></div>`;
-            });
-        }
-
-        function calcularFechamento() {
-            const tipo = document.getElementById('closingType').value;
-            const dataInput = document.getElementById('closingDate').value;
-            if(!dataInput) return;
-
-            const refDate = new Date(dataInput + 'T00:00:00');
-            
-            let filtradas = db.sales.filter(v => {
-                const vDate = new Date(v.date);
-                if(tipo === 'dia') {
-                    return vDate.toDateString() === refDate.toDateString();
-                } else if(tipo === 'semana') {
-                    const startOfWeek = new Date(refDate);
-                    startOfWeek.setDate(refDate.getDate() - refDate.getDay());
-                    const endOfWeek = new Date(startOfWeek);
-                    endOfWeek.setDate(startOfWeek.getDate() + 6);
-                    return vDate >= startOfWeek && vDate <= endOfWeek;
-                } else if(tipo === 'mes') {
-                    return vDate.getMonth() === refDate.getMonth() && vDate.getFullYear() === refDate.getFullYear();
-                }
-                return false;
-            });
-
-            let totalVendido = 0;
-            let totalPares = filtradas.length;
-            let totalPix = 0;
-            let totalDinheiro = 0;
-            let totalCartao = 0;
-
-            filtradas.forEach(v => {
-                totalVendido += v.price;
-                if(v.payment === 'Pix') totalPix += v.price;
-                if(v.payment === 'Dinheiro') totalDinheiro += v.price;
-                if(v.payment === 'Cartão') totalCartao += v.price;
-            });
-
-            window.ultimoFechamentoTexto = `*Fechamento Empório dos Tênis (${tipo.toUpperCase()})*\n📅 Ref: ${dataInput.split('-').reverse().join('/')}\n\n👟 Pares vendidos: ${totalPares}\n💵 Dinheiro: R$ ${totalDinheiro.toFixed(2)}\n💠 Pix: R$ ${totalPix.toFixed(2)}\n💳 Cartão: R$ ${totalCartao.toFixed(2)}\n\n*Soma Total: R$ ${totalVendido.toFixed(2)}*`;
-
-            document.getElementById('closingResult').innerHTML = `
-                <p><b>Pares Vendidos:</b> ${totalPares}</p>
-                <p><b>Dinheiro:</b> R$ ${totalDinheiro.toFixed(2)}</p>
-                <p><b>Pix:</b> R$ ${totalPix.toFixed(2)}</p>
-                <p><b>Cartão:</b> R$ ${totalCartao.toFixed(2)}</p>
-                <hr style="margin: 8px 0; border:0; border-top:1px solid #cbd5e1;">
-                <p><b>Soma Total:</b> <span style="color:var(--success); font-size:1.1rem;">R$ ${totalVendido.toFixed(2)}</span></p>
-            `;
-        }
-
-        function compartilharWhatsApp() {
-            if(!window.ultimoFechamentoTexto) {
-                alert('Calcule o fechamento primeiro.');
-                return;
-            }
-            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(window.ultimoFechamentoTexto)}`;
-            window.open(url, '_blank');
-        }
-
-        // Inicialização
-        atualizarSelects();
-        atualizarEstoqueView();
-        atualizarVendasRecentes();
-
-        // Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('./sw.js');
-        }
-    </script>
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('sw.js').catch(() => {});
+mostrar();
+</script>
 </body>
 </html>
