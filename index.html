@@ -18,6 +18,7 @@
             --text-light: #64748b;
             --border: #e2e8f0;
             --success: #16a34a;
+            --danger: #dc2626;
         }
 
         * {
@@ -30,7 +31,7 @@
         body {
             background-color: var(--bg);
             color: var(--text);
-            padding-bottom: 80px;
+            padding-bottom: 90px;
         }
 
         header {
@@ -137,6 +138,13 @@
             background-color: #15803d;
         }
 
+        .btn-danger {
+            background-color: var(--danger);
+            font-size: 0.8rem;
+            padding: 6px 10px;
+            width: auto;
+        }
+
         .payment-grid {
             display: grid;
             grid-template-columns: 1fr;
@@ -182,7 +190,7 @@
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: space-around;
-            padding: 8px 0;
+            padding: 8px 2px;
             z-index: 1000;
             box-shadow: 0 -2px 5px rgba(0,0,0,0.05);
         }
@@ -194,15 +202,15 @@
             flex-direction: column;
             align-items: center;
             color: var(--text-light);
-            font-size: 0.75rem;
+            font-size: 0.65rem;
             cursor: pointer;
             flex: 1;
-            padding: 4px;
+            padding: 2px;
         }
 
         .nav-item svg {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             margin-bottom: 2px;
             fill: currentColor;
         }
@@ -231,12 +239,7 @@
             border-radius: 8px;
             margin-top: 10px;
             font-size: 0.95rem;
-        }
-        .summary-box p {
-            margin-bottom: 6px;
-        }
-        .summary-box p:last-child {
-            margin-bottom: 0;
+            white-space: pre-line;
         }
     </style>
 </head>
@@ -287,12 +290,12 @@
             </div>
 
             <div class="card">
-                <h2>Vendas Recentes</h2>
+                <h2>Últimas Vendas Realizadas</h2>
                 <div id="recentSalesList"></div>
             </div>
         </div>
 
-        <!-- ABA ENTRADA (Cadastro de Modelo + Entrada de Mercadoria) -->
+        <!-- ABA ENTRADA -->
         <div id="tab-entrada" class="tab-content">
             <div class="card">
                 <h2>Cadastrar Novo Modelo</h2>
@@ -333,6 +336,15 @@
             </div>
         </div>
 
+        <!-- ABA HISTÓRICO -->
+        <div id="tab-historico" class="tab-content">
+            <div class="card">
+                <h2>Histórico Geral de Vendas</h2>
+                <p style="font-size:0.85rem; color:var(--text-light); margin-bottom:12px;">Todas as vendas registradas com hora, forma e valor.</p>
+                <div id="fullHistoryList"></div>
+            </div>
+        </div>
+
         <!-- ABA FECHAMENTO -->
         <div id="tab-fechamento" class="tab-content">
             <div class="card">
@@ -354,8 +366,9 @@
                     <!-- Preenchido via JS -->
                 </div>
 
-                <div style="margin-top: 15px;">
+                <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                     <button type="button" class="btn btn-success" onclick="compartilharWhatsApp()">📲 Compartilhar Fechamento</button>
+                    <button type="button" class="btn" onclick="compartilharRelatorioDiarioZap()" style="background-color: #25d366;">💬 Enviar Relatório Diário (Modelo Zap)</button>
                 </div>
             </div>
         </div>
@@ -376,6 +389,10 @@
             <svg viewBox="0 0 24 24"><path d="M20 6h-4V4c0-1.1-.9-2-2-2h-4c-1.1 0-2 .9-2 2v2H4c-1.1 0-2 .9-2 2v11c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zM10 4h4v2h-4V4zm10 15H4V8h16v11z"/></svg>
             Estoque
         </button>
+        <button class="nav-item" onclick="switchTab('historico', this)">
+            <svg viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6a7 7 0 1 1 7 7 7 7 0 0 1-7-7h-2a9 9 0 1 0 9-9zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8H12z"/></svg>
+            Histórico
+        </button>
         <button class="nav-item" onclick="switchTab('fechamento', this)">
             <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
             Fechamento
@@ -383,7 +400,6 @@
     </nav>
 
     <script>
-        // Inicializar Banco Local
         let db = JSON.parse(localStorage.getItem('emporio_db')) || { models: [], stock: {}, sales: [] };
 
         function saveDb() {
@@ -395,9 +411,12 @@
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             document.getElementById('tab-' + tabName).classList.add('active');
             el.classList.add('active');
+            
             if(tabName === 'fechamento') {
                 document.getElementById('closingDate').valueAsDate = new Date();
                 calcularFechamento();
+            } else if(tabName === 'historico') {
+                atualizarHistoricoCompleto();
             }
         }
 
@@ -487,6 +506,7 @@
             if(db.stock[model] && db.stock[model][size] > 0) {
                 db.stock[model][size]--;
                 db.sales.push({
+                    id: Date.now(),
                     date: new Date().toISOString(),
                     model: model,
                     size: size,
@@ -504,6 +524,27 @@
                 alert('Produto sem estoque neste tamanho!');
             }
         });
+
+        function apagarVenda(id) {
+            if(confirm('Deseja realmente apagar esta venda e devolver o par ao estoque?')) {
+                const index = db.sales.findIndex(v => v.id === id);
+                if(index !== -1) {
+                    const venda = db.sales[index];
+                    if(db.stock[venda.model] && db.stock[venda.model][venda.size] !== undefined) {
+                        db.stock[venda.model][venda.size]++;
+                    } else {
+                        if(!db.stock[venda.model]) db.stock[venda.model] = {};
+                        db.stock[venda.model][venda.size] = 1;
+                    }
+                    db.sales.splice(index, 1);
+                    saveDb();
+                    atualizarEstoqueView();
+                    atualizarVendasRecentes();
+                    atualizarHistoricoCompleto();
+                    alert('Venda apagada e estoque estornado.');
+                }
+            }
+        }
 
         function atualizarEstoqueView() {
             const list = document.getElementById('stockList');
@@ -529,8 +570,47 @@
                 return;
             }
             ultimas.forEach(v => {
-                const dataStr = new Date(v.date).toLocaleDateString('pt-BR', {hour: '2-digit', minute:'2-digit'});
-                list.innerHTML += `<div class="sale-item"><div><b>${v.model}</b> (Tam ${v.size})<br><small style="color:var(--text-light)">${dataStr} - ${v.payment}</small></div><b style="color:var(--success)">R$ ${v.price.toFixed(2)}</b></div>`;
+                const dataObj = new Date(v.date);
+                const horaStr = dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                const dataStr = dataObj.toLocaleDateString('pt-BR');
+                list.innerHTML += `
+                    <div class="sale-item">
+                        <div>
+                            <b>${v.model}</b> (Tam ${v.size})<br>
+                            <small style="color:var(--text-light)">📅 ${dataStr} às ${horaStr} | 💳 ${v.payment}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <b style="color:var(--success)">R$ ${v.price.toFixed(2)}</b><br>
+                            <button class="btn btn-danger" onclick="apagarVenda(${v.id})" style="margin-top: 4px;">Excluir</button>
+                        </div>
+                    </div>`;
+            });
+        }
+
+        function atualizarHistoricoCompleto() {
+            const list = document.getElementById('fullHistoryList');
+            list.innerHTML = '';
+            if(db.sales.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-light); text-align:center;">Nenhum histórico registrado.</p>';
+                return;
+            }
+            const todas = [...db.sales].reverse();
+            todas.forEach(v => {
+                const dataObj = new Date(v.date);
+                const horaStr = dataObj.toLocaleTimeString('pt-BR', {hour: '2-digit', minute:'2-digit'});
+                const dataStr = dataObj.toLocaleDateString('pt-BR');
+                list.innerHTML += `
+                    <div class="sale-item">
+                        <div>
+                            <b>${v.model}</b> (Tam ${v.size})<br>
+                            <small style="color:var(--text-light)">🕒 Hora: ${horaStr} | 📅 Data: ${dataStr}</small><br>
+                            <small style="color:var(--primary); font-weight:600;">Forma: ${v.payment}</small>
+                        </div>
+                        <div style="text-align: right;">
+                            <b style="color:var(--success)">R$ ${v.price.toFixed(2)}</b><br>
+                            <button class="btn btn-danger" onclick="apagarVenda(${v.id})" style="margin-top: 4px;">Excluir</button>
+                        </div>
+                    </div>`;
             });
         }
 
@@ -563,20 +643,24 @@
             let totalDinheiro = 0;
             let totalCartao = 0;
 
+            let qtdPix = 0;
+            let qtdDinheiro = 0;
+            let qtdCartao = 0;
+
             filtradas.forEach(v => {
                 totalVendido += v.price;
-                if(v.payment === 'Pix') totalPix += v.price;
-                if(v.payment === 'Dinheiro') totalDinheiro += v.price;
-                if(v.payment === 'Cartão') totalCartao += v.price;
+                if(v.payment === 'Pix') { totalPix += v.price; qtdPix++; }
+                if(v.payment === 'Dinheiro') { totalDinheiro += v.price; qtdDinheiro++; }
+                if(v.payment === 'Cartão') { totalCartao += v.price; qtdCartao++; }
             });
 
-            window.ultimoFechamentoTexto = `*Fechamento Empório dos Tênis (${tipo.toUpperCase()})*\n📅 Ref: ${dataInput.split('-').reverse().join('/')}\n\n👟 Pares vendidos: ${totalPares}\n💵 Dinheiro: R$ ${totalDinheiro.toFixed(2)}\n💠 Pix: R$ ${totalPix.toFixed(2)}\n💳 Cartão: R$ ${totalCartao.toFixed(2)}\n\n*Soma Total: R$ ${totalVendido.toFixed(2)}*`;
+            window.ultimoFechamentoTexto = `*Fechamento Empório dos Tênis (${tipo.toUpperCase()})*\n📅 Ref: ${dataInput.split('-').reverse().join('/')}\n\n👟 Pares vendidos: ${totalPares}\n💵 Dinheiro: R$ ${totalDinheiro.toFixed(2)} (${qtdDinheiro} un)\n💠 Pix: R$ ${totalPix.toFixed(2)} (${qtdPix} un)\n💳 Cartão: R$ ${totalCartao.toFixed(2)} (${qtdCartao} un)\n\n*Soma Total: R$ ${totalVendido.toFixed(2)}*`;
 
             document.getElementById('closingResult').innerHTML = `
                 <p><b>Pares Vendidos:</b> ${totalPares}</p>
-                <p><b>Dinheiro:</b> R$ ${totalDinheiro.toFixed(2)}</p>
-                <p><b>Pix:</b> R$ ${totalPix.toFixed(2)}</p>
-                <p><b>Cartão:</b> R$ ${totalCartao.toFixed(2)}</p>
+                <p><b>Dinheiro:</b> R$ ${totalDinheiro.toFixed(2)} (${qtdDinheiro} pares)</p>
+                <p><b>Pix:</b> R$ ${totalPix.toFixed(2)} (${qtdPix} pares)</p>
+                <p><b>Cartão:</b> R$ ${totalCartao.toFixed(2)} (${qtdCartao} pares)</p>
                 <hr style="margin: 8px 0; border:0; border-top:1px solid #cbd5e1;">
                 <p><b>Soma Total:</b> <span style="color:var(--success); font-size:1.1rem;">R$ ${totalVendido.toFixed(2)}</span></p>
             `;
@@ -591,12 +675,55 @@
             window.open(url, '_blank');
         }
 
+        function compartilharRelatorioDiarioZap() {
+            if(db.sales.length === 0) {
+                alert('Nenhuma venda registrada para gerar relatório.');
+                return;
+            }
+
+            // Agrupar vendas por dia (formato YYYY-MM-DD)
+            let diasMap = {};
+            db.sales.forEach(v => {
+                const dataKey = v.date.split('T')[0];
+                if(!diasMap[dataKey]) {
+                    diasMap[dataKey] = { pix: 0, dinheiro: 0, cartao: 0, totalPares: 0, valorTotal: 0 };
+                }
+                diasMap[dataKey].totalPares++;
+                diasMap[dataKey].valorTotal += v.price;
+
+                if(v.payment === 'Pix') diasMap[dataKey].pix++;
+                if(v.payment === 'Dinheiro') diasMap[dataKey].dinheiro++;
+                if(v.payment === 'Cartão') diasMap[dataKey].cartao++;
+            });
+
+            let textoFinal = "*📊 Relatório de Vendas - Empório dos Tênis*\n\n";
+
+            // Ordenar dias
+            let diasOrdenados = Object.keys(diasMap).sort();
+
+            diasOrdenados.forEach(diaKey => {
+                let d = diasMap[diaKey];
+                let dataFormatada = diaKey.split('-').reverse().join('/');
+                
+                let detalhesFormas = [];
+                if(d.pix > 0) detalhesFormas.push(`${d.pix} pares (pix)`);
+                if(d.dinheiro > 0) detalhesFormas.push(`${d.dinheiro} pares (dinheiro)`);
+                if(d.cartao > 0) detalhesFormas.push(`${d.cartao} pares (cartão)`);
+
+                textoFinal += `Data: ${dataFormatada} = ${detalhesFormas.join('  ')}\n`;
+                textoFinal += `Total = ${d.totalPares} pares\n`;
+                textoFinal += `Valor = R$ ${d.valorTotal.toFixed(2)}\n\n`;
+            });
+
+            const url = `https://api.whatsapp.com/send?text=${encodeURIComponent(textoFinal)}`;
+            window.open(url, '_blank');
+        }
+
         // Inicialização
         atualizarSelects();
         atualizarEstoqueView();
         atualizarVendasRecentes();
 
-        // Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('./sw.js');
         }
